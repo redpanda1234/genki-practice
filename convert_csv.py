@@ -73,8 +73,28 @@ def filter_by(df, col, val):
     can't do things like `"L11" in df[col]` because the columns are
     formatted like "会L11-II" or something.
     """
+    # If we passed in a list of values to filter by, we check for
+    # where _any_ of them are valid
+    if type(val) == list:
+        return df[
+            [any([val_entry in df_entry for val_entry in val]) for df_entry in df[col]]
+        ]
+
     # Create a simple bool array to index into the dataframe with
     return df[[val in entry for entry in df[col]]]
+
+
+# Get vocab for lessons 3-12. We have to get vocab for lessons 1 and 2
+# separately because the "in" part messes up by including things from
+# L11, L12, L13, ... because they all contain L1.
+#
+# I guess I should have just hard-coded this from the beginning but
+# w/e.
+our_lessons = [f"L{i}" for i in range(3, 13)]
+df = filter_by(df, "lesson", our_lessons)
+l1df = df[[("会L1" == entry) or ("L1," in entry) for entry in df["lesson"]]]
+l2df = df[[("会L2" == entry) or ("L2," in entry) for entry in df["lesson"]]]
+df = pd.concat([df, l1df, l2df])
 
 
 # ================================================================== #
@@ -90,6 +110,7 @@ def filter_by(df, col, val):
 
 def qualify_noun():
     """
-    Qualifying nouns with verbs and adjectives
+    Qualifying nouns with verbs and adjectives (see: L9, pg. 213)
     """
+
     return
