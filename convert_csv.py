@@ -97,6 +97,19 @@ l2df = df[[("会L2" == entry) or ("L2," in entry) for entry in df["lesson"]]]
 df = pd.concat([df, l1df, l2df])
 
 
+def write_nouns():
+    """
+    write nouns to a text file so that we can do stuff with them
+    """
+    text_file = open("Nouns.txt", "w")
+    n_df = filter_by(df, "pos", "noun")
+    noun_string = ""
+    for noun in n_df["english"].values:
+        noun_string += f'"{noun}",\n'
+    text_file.write(noun_string)
+    text_file.close
+
+
 # ================================================================== #
 #                                                                    #
 #                        Ok now the real shit                        #
