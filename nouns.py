@@ -1,11 +1,4 @@
-# Here we have a classifcation of nouns based on whether they're
-# 1) inanimate objects,
-# 2) animate things (e.g., people),
-# 3) places
-# 4) times
-# 5) abstract things
-# 6) body parts
-
+# Here we have a classifcation of nouns for use in doing things
 inanimate = [
     "chair",
     "flower",
@@ -48,9 +41,18 @@ animals = [
     "cat",
 ]
 
-animate = animals + [
-    "good child",
+people = [
+    "college student",
     "child",
+    "grandfather; old man",
+    "grandmother; old woman",
+    "man",
+    "woman",
+    "boy",
+    "girl",
+]
+
+personal_people = [
     "brothers and sisters",
     "younger sister",
     "younger brother",
@@ -59,24 +61,27 @@ animate = animals + [
     "(my) older sister",
     "(my) father",
     "(my) mother",
-    "daughter",
-    "college student",
-    "roommate",
-    "doctor",
-    "you",
-    "God",
-    "adult",
-    "grandmother; old woman",
-    "family",
-    "man",
-    "boy",
     "boyfriend",
-    "woman",
-    "girl",
     "girlfriend",
-    "grandfather; old man",
-    "guardian deity of children",
+    "roommate",
+    # "daughter",
+    # "family",
 ]
+
+animate = (
+    animals
+    + personal_people
+    + [
+        "good child",
+        # "doctor",
+        # "you",
+        # "God",
+        # "adult",
+        "man",
+        "woman",
+        "guardian deity of children",
+    ]
+)
 
 
 wear_able = [
@@ -156,7 +161,7 @@ write_able = [
     "e-mail",
     "essay; composition",
     "letter",
-    # "postcard",
+    "postcard",
 ]
 
 see_able = [
@@ -221,7 +226,7 @@ eat_able = [
     "rice; meal",
 ]
 
-buy_able = drink_able + eat_able + []
+buy_able = drink_able + eat_able + inanimate
 
 body_parts = [
     "head",
@@ -360,26 +365,33 @@ durations = [
     # ". . . hours",
 ]
 
-times_relative = [
-    "morning",
-    "noon",
-    "night",
+# These don't have to _strictly_ refer to past times, but they can.
+times_past = [
+    "yesterday",
+    "the day before yesterday",
+    "the year before last",
+    "two months ago",
+    "two weeks ago",
+    "last month",
+    "last week",
+    "last year",
+]
+
+times_relative = times_past + [
     "breakfast",
     "dinner",
     "lunch",
+    "morning",
+    "noon",
+    "night",
     "weekend",
     "this morning",
     "tonight",
     "today",
-    "yesterday",
     "this week",
     "this semester",
     "this month",
     "this year",
-    "the day before yesterday",
-    "two months ago",
-    "two weeks ago",
-    "the year before last",
     "tomorrow",
     "the day after tomorrow",
     "next semester",
@@ -389,9 +401,6 @@ times_relative = [
     "the month after next",
     "the week after next",
     "the year after next",
-    "last month",
-    "last week",
-    "last year",
     "near future",
     "future",
 ]
@@ -562,4 +571,41 @@ no_idea = [
     "we",
     "mountain road",
     "dream",
+]
+
+noun_lists = [
+    inanimate,
+    subjects,
+    practice_able,
+    study_able,
+    animals,
+    people,
+    personal_people,
+    animate,
+    wear_able,
+    become_able,
+    do_able,
+    make_able,
+    write_able,
+    see_able,
+    read_able,
+    means_of_transport,
+    hear_able,
+    drink_able,
+    eat_able,
+    buy_able,
+    body_parts,
+    colors,
+    weather,
+    places_relative,
+    places_abstract,
+    directions,
+    sub_places,
+    frequency,
+    personal_places,
+    places_absolute,
+    durations,
+    times_relative,
+    times_absolute,
+    categories,
 ]
