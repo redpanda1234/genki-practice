@@ -25,26 +25,71 @@ volitional_form = jvfg.generate_volitional_form
 # ------------------------------------------------------------------ #
 
 
-xl_file = pd.ExcelFile("Genki_2.xlsx")
-dfs = {sheet_name: xl_file.parse(sheet_name) for sheet_name in xl_file.sheet_names}
+# Row 9 in the column name row
+df = pd.read_excel("Genki_2.xlsx", header=9)
 
-# There's only one dataframe in the dictionary
-df = dfs["単語さくいん（第2版）"]
+# The columns have names written in japanese. I'm not going to mutate
+# the csv in any way so we'll just rename the columns of the dataframe
+# as we instantiate it.
+#
+# "pos" is for "part of speech"
+c = {"単語": "word", "漢字表記": "kanji", "品詞": "pos", "英訳": "english", "課数": "lesson"}
+df.rename(columns=c, inplace=True)
 
-# Dictionary for converting between parts of speech and the way genki
-# refers to them
+
+# Replace the "parts of speech" entries with easier labels.
+#
+# Yes, they're longer (for the most part), but it's just easier to
+# read in-place so whatever.
 parts_of_speech = {
-    "i": "い-adj.",
-    "n": "n.",
-    "na": "な-adj.",
-    "u": "u-v.",
-    "ru": "ru-v.",
-    "ir": "irr-v.",
-    "adv": "adv.",
-    "part": "part.",
-    "pre": "pre.",
-    "suf": "suf.",
-    "exp": "exp.",
+    "n.": "noun",  # noun
+    "い-adj.": "i-adj",  # i adjective
+    "な-adj.": "na-adj",  # na adjective
+    "u-v.": "u-verb",  # u verb
+    "ru-v.": "ru-verb",  # ru verb
+    "irr-v.": "irr-verb",  # irregular verb
+    "adv.": "adverb",  # adverb
+    "part.": "particle",  # particle
+    "pre.": "pre-nom",  # pre-nominal expression, e.g. 「その___」
+    "suf.": "nf-suffix",  # (noun-forming) suffix, e.g. 「___円」or「___か月」
+    "exp.": "expression",  # expression
 }
 
-colnames = {"word": "単語", "kanji": "漢字表記", "pos": "品詞", "english": "英訳", "lesson": "課数"}
+# Replace the columns
+df["pos"].replace(parts_of_speech, inplace=True)
+
+
+def filter_by(df, col, val):
+    """
+    df: the genki csv dataframe
+    col: the column we want to filter in
+    val: the value we want to filter for
+
+    Example:
+        filter_by(df, "lesson", "L15")
+
+    We have to do this because pandas built-in filtering scheme
+    doesn't allow us to filter by things like `val in df[col]`, so we
+    can't do things like `"L11" in df[col]` because the columns are
+    formatted like "会L11-II" or something.
+    """
+    # Create a simple bool array to index into the dataframe with
+    return df[[val in entry for entry in df[col]]]
+
+
+# ================================================================== #
+#                                                                    #
+#                        Ok now the real shit                        #
+#                                                                    #
+# ================================================================== #
+#                                                                    #
+#                      (i.e. practice functions)                     #
+#                                                                    #
+# ------------------------------------------------------------------ #
+
+
+def qualify_noun():
+    """
+    Qualifying nouns with verbs and adjectives
+    """
+    return
