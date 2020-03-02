@@ -582,3 +582,95 @@ def tai_practice():
     except UnicodeDecodeError:
         print(f"{response} is the expected answer.\n")
         pass
+
+
+def n_desu_practice():
+    pass
+
+
+def youd_better_practice():
+    pass
+
+
+def obligation_practice():
+
+    particle = "を"
+
+    (ntype, j_verb, en_verb) = pick(
+        [
+            (nouns.do_able, "する", "to do"),
+            (nouns.study_able, "勉強する", "to study"),
+            (nouns.become_able, "なる", "to become"),
+            # (nouns.animals, "飼う", "to own"),
+            (nouns.eat_able, "食べる", "to eat"),
+            (nouns.see_able, "見る", "to see"),
+            (nouns.read_able, "読む", "to read"),
+            (nouns.drink_able, "飲む", "to drink"),
+            (nouns.write_able, "書く", "to write"),
+            (nouns.buy_able, "買う", "to buy"),
+            (nouns.places_absolute, "行く", "to go"),
+        ]
+    )
+
+    if j_verb == "行く":
+        particle = "に"
+
+    en_noun = pick(ntype)
+    j_noun = japanese(en_noun)
+
+    vclass = j_verb_class(j_verb)
+
+    in_the_past = pick([True, False])
+    do_n_desu = pick([True, False])
+
+    n_desu = ""
+    en_time = ""
+
+    if in_the_past:
+        en_time = pick(nouns.times_past)
+        j_time = japanese(en_time)
+        en_prefix = "[I] had"
+        j_suffixes = [
+            "ければいけませんでした",
+            "きゃいけませんでした",
+            "くちゃいけませんでした",
+        ]
+        if do_n_desu:
+            n_desu = "なんでした"
+
+    else:
+        en_time = pick(nouns.times_future)
+        j_time = japanese(en_time)
+        en_prefix = "[I] have"
+        j_suffixes = [
+            "ければいけません",
+            "きゃいけません",
+            "くちゃいけません",
+        ]
+
+        if do_n_desu:
+            n_desu = "なんです"
+
+    j_verb = plain_form(j_verb, vclass, Tense.NONPAST, Polarity.NEGATIVE)
+    j_verb = j_verb[0:-1]  # Trim off the 「い」at the end
+
+    english_prompt = f'Translate "{en_prefix} {en_verb} {en_noun} {en_time}"'
+    possible_responses = [
+        f"{j_time}{j_noun}{particle}{j_verb}{j_suffix}" for j_suffix in j_suffixes
+    ]
+
+    try:
+        user_input = input(english_prompt + "\n")
+        # print(f"you said {user_input}")
+        if user_input not in possible_responses:
+            print("Any of the following would have been accepted:\n")
+            for response in possible_responses:
+                print(response)
+            return
+        else:
+            print("correct\n")
+    except UnicodeDecodeError:
+        print("Any of the following would have been accepted:\n")
+        for response in possible_responses:
+            print(response)
+        pass
