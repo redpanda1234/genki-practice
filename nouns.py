@@ -356,7 +356,7 @@ places_absolute = [
     "Australia",
     "Mexico",
     "Italy",
-    "the Milky Way",
+    # "the Milky Way",
 ]
 
 durations = [
@@ -377,7 +377,7 @@ times_past = [
     "last year",
 ]
 
-times_relative = times_past + [
+times_future = [
     "breakfast",
     "dinner",
     "lunch",
@@ -404,6 +404,8 @@ times_relative = times_past + [
     "near future",
     "future",
 ]
+
+times_relative = times_past + times_future
 
 times_absolute = [
     "New Year’s",

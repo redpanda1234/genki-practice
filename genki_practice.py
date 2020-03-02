@@ -19,6 +19,9 @@ jvfg = JapaneseVerbFormGenerator.JapaneseVerbFormGenerator()
 # The provided macros are too verbose for me
 #
 # Requires: verb, verb_class, tense, polarity
+polite_form = jvfg.generate_polite_form
+
+# Requires: verb, verb_class, tense, polarity
 plain_form = jvfg.generate_plain_form
 
 # Requires: verb, verb_class
@@ -152,6 +155,22 @@ def verb_class(en_verb):
         assert False  # Haha what
 
 
+def j_verb_class(en_verb):
+    """
+    same as above but the input is japanese
+    """
+    verb = df[[en_verb == entry for entry in df["word"]]]
+    verb_class = verb["pos"].values[0]
+    if verb_class == "ru-verb":
+        return VerbClass.ICHIDAN
+    elif verb_class == "u-verb":
+        return VerbClass.GODAN
+    elif verb_class == "irr-verb":
+        return VerbClass.IRREGULAR
+    else:
+        assert False  # Haha what
+
+
 def japanese(english):
     """
     return the japanese word corresponding to the `english` entry in
@@ -242,4 +261,256 @@ def qualify_noun():
     except UnicodeDecodeError:
         pass
 
-    return response
+    print(f"Sample response is: {response}\n")
+
+    return  # response
+
+
+def single_short_form(verb, eng_pol, eng_tense, ja_verb, vclass, polarity, tense):
+    en_verb = verb
+    if eng_pol == "NEGATIVE":
+        en_verb = en_verb[0:3] + "NOT " + en_verb[3:]
+
+    if eng_tense == "PAST":
+        en_verb = en_verb[0:3] + "(have) " + en_verb[3:]
+
+    english_prompt = f'Short form of "{en_verb}":'
+
+    response = plain_form(ja_verb, vclass, tense, polarity)
+
+    return_me = None
+
+    try:
+        user_input = input(english_prompt + "\n")
+        print(f"you said {user_input}")
+        if user_input != response:
+            return_me = (verb, eng_pol, eng_tense, ja_verb, vclass, polarity, tense)
+
+    except UnicodeDecodeError:
+        pass
+
+    print(f"Correct conjugation is: {response}\n")
+
+    return return_me
+
+
+def random_short_form():
+    """
+    This one picks a random short form and then runs single_short_form
+    to quiz on it
+
+    We keep these functions separate so that we can do a primitive
+    review feature in short_form_practice by feeding wrong ones back
+    into single_short_form later
+    """
+    polarity, eng_pol = pick(
+        [(Polarity.NEGATIVE, "NEGATIVE"), (Polarity.POSITIVE, "AFFIRMATIVE")]
+    )
+
+    tense, eng_tense = pick([(Tense.PAST, "PAST"), (Tense.NONPAST, "NONPAST")])
+
+    # Pick the verb
+    verb = "it"
+    while ("(something)" in verb) or (
+        verb[0:2] == "it"
+    ):  # don't want verbs like "はじまる"
+        verb = pick(verb_list)
+
+    ja_verb = japanese(verb)
+    vclass = verb_class(verb)
+
+    return single_short_form(verb, eng_pol, eng_tense, ja_verb, vclass, polarity, tense)
+
+
+def short_form_practice(n):
+    wrong = []
+    for _ in range(n):
+        response = random_short_form()
+        if response is not None:
+            wrong += [response]
+
+    while wrong:
+        print(f"{len(wrong)} verbs to review.")
+        review = pick([1, 2, 3])
+        if review == 1:
+            forgotten_verb = wrong[0]
+            wrong = wrong[1:]
+            response = single_short_form(*forgotten_verb)
+            if response is not None:
+                wrong += [response]
+        else:
+            response = random_short_form()
+            if response is not None:
+                wrong += [response]
+
+    return
+
+
+def single_ongoing_negative():
+    # verb = pick(verb_list)
+
+    (ntype, verb, did, have_already_done, did_not_do, have_not_done) = pick(
+        [
+            (
+                nouns.do_able,
+                "する",
+                "did",
+                "have already done",
+                "did not do",
+                "have not done",
+            ),
+            (
+                nouns.eat_able,
+                "たべる",
+                "ate",
+                "have already eaten",
+                "didn't eat",
+                "have not eaten",
+            ),
+            (
+                nouns.drink_able,
+                "のむ",
+                "drank",
+                "have already drunk",
+                "did not drink",
+                "haven't drunk",
+            ),
+            (
+                nouns.write_able,
+                "かく",
+                "wrote",
+                "already wrote",
+                "did not write",
+                "haven't written",
+            ),
+            (
+                nouns.buy_able,
+                "かう",
+                "bought",
+                "already bought",
+                "did not buy",
+                "haven't bought",
+            ),
+            (
+                nouns.places_absolute,
+                "いく",
+                "went",
+                "already went",
+                "didn't go",
+                "haven't gone",
+            ),
+        ]
+    )
+
+    noun = pick(ntype)
+
+    # Ok I know this is garbage and I should be handling cases more
+    # intelligently but idk lay off ok
+    tense = pick([1, 2, 3, 4])
+
+    if tense == 1:
+        time = pick(nouns.times_past)
+        english_prompt = f"I {did} the {noun} {time}."
+        vclass = j_verb_class(verb)
+        jverb = polite_form(verb, vclass, Tense.PAST, Polarity.POSITIVE)
+        response = f"わたしは{japanese(time)}{japanese(noun)}を{jverb}"
+
+    elif tense == 2:
+
+        english_prompt = f"I {have_already_done} the {noun}."
+        vclass = j_verb_class(verb)
+        jverb = polite_form(verb, vclass, Tense.PAST, Polarity.POSITIVE)
+        response = f"わたしはもう{japanese(noun)}を{jverb}"
+
+    if tense == 3:
+        time = pick(nouns.times_past)
+        english_prompt = f"I {did_not_do} the {noun} {time}."
+        vclass = j_verb_class(verb)
+        jverb = polite_form(verb, vclass, Tense.PAST, Polarity.NEGATIVE)
+        response = f"わたしは{japanese(time)}{japanese(noun)}を{jverb}"
+
+    elif tense == 4:
+        english_prompt = f"I {have_not_done} the {noun} yet."
+        vclass = j_verb_class(verb)
+        jverb = te_form(verb, vclass)
+        response = f"わたしはまだ{japanese(noun)}を{jverb}いません"
+
+    try:
+        user_input = input(english_prompt + "\n")
+        # print(f"you said {user_input}")
+        if user_input != response:
+            print(f"{response} is the expected answer\n")
+            return
+        else:
+            print("correct\n")
+    except UnicodeDecodeError:
+        print(
+            f"{response} is the expected answer. You weren't necessarily wrong though.\n"
+        )
+        pass
+
+
+def comparison_practice():
+
+    pass
+
+
+def plan_practice():
+    (ntype, verb, en_verb) = pick(
+        [
+            (nouns.do_able, "する", "to do"),
+            (nouns.eat_able, "たべる", "to eat"),
+            (nouns.see_able, "みる", "to see"),
+            (nouns.read_able, "よむ", "to read"),
+            (nouns.drink_able, "のむ", "to drink"),
+            (nouns.write_able, "かく", "to write"),
+            (nouns.buy_able, "かう", "to buy"),
+            (nouns.places_absolute, "いく", "to go"),
+        ]
+    )
+
+    en_noun = pick(noun_type)
+    j_noun = japanese(en_noun)
+
+    vclass = j_verb_class(vclass)
+
+    past, polarity, en_tense, j_tense = pick(
+        [
+            (True, Polarity.POSITIVE, "I was planning", "つもりでした",),
+            (True, Polarity.NEGATIVE, "I was not planning", "つもりでした",),
+            (False, Polarity.POSITIVE, "I plan", "つもりでした",),
+            (False, Polarity.NEGATIVE, "I do not plan", "つもりでした",),
+        ]
+    )
+
+    if past:
+        # If somehting _was_ our plan before, it could have been for
+        # any time.
+        en_time = pick(nouns.times_past + nouns.times_future + nouns.times_absolute)
+    else:
+        en_time = pick(nouns.times_future + nouns.times_absolute)
+
+    j_time = japanese(en_time)
+
+    jverb = plain_form(verb, vclass, Tense.NONPAST, polarity)
+
+    english_prompt = f'Translate "{en_tense} {en_verb} {noun} {en_time}"'
+    response = f"わたしは{time}{j_verb}{j_tense}"
+
+    try:
+        user_input = input(english_prompt + "\n")
+        # print(f"you said {user_input}")
+        if user_input != response:
+            print(f"{response} is the expected answer\n")
+            return
+        else:
+            print("correct\n")
+    except UnicodeDecodeError:
+        print(
+            f"{response} is the expected answer. You weren't necessarily wrong though.\n"
+        )
+        pass
+
+
+def become_practice():
+    pass
