@@ -351,6 +351,8 @@ def short_form_practice(n):
 def single_ongoing_negative():
     # verb = pick(verb_list)
 
+    particle = "を"
+
     (ntype, verb, did, have_already_done, did_not_do, have_not_done) = pick(
         [
             (
@@ -363,7 +365,7 @@ def single_ongoing_negative():
             ),
             (
                 nouns.eat_able,
-                "たべる",
+                "食べる",
                 "ate",
                 "have already eaten",
                 "didn't eat",
@@ -371,7 +373,7 @@ def single_ongoing_negative():
             ),
             (
                 nouns.drink_able,
-                "のむ",
+                "飲む",
                 "drank",
                 "have already drunk",
                 "did not drink",
@@ -379,7 +381,7 @@ def single_ongoing_negative():
             ),
             (
                 nouns.write_able,
-                "かく",
+                "書く",
                 "wrote",
                 "already wrote",
                 "did not write",
@@ -387,7 +389,7 @@ def single_ongoing_negative():
             ),
             (
                 nouns.buy_able,
-                "かう",
+                "買う",
                 "bought",
                 "already bought",
                 "did not buy",
@@ -395,7 +397,7 @@ def single_ongoing_negative():
             ),
             (
                 nouns.places_absolute,
-                "いく",
+                "行く",
                 "went",
                 "already went",
                 "didn't go",
@@ -403,6 +405,9 @@ def single_ongoing_negative():
             ),
         ]
     )
+
+    if verb == "行く":
+        particle = "に"
 
     noun = pick(ntype)
 
@@ -415,27 +420,27 @@ def single_ongoing_negative():
         english_prompt = f"I {did} the {noun} {time}."
         vclass = j_verb_class(verb)
         jverb = polite_form(verb, vclass, Tense.PAST, Polarity.POSITIVE)
-        response = f"わたしは{japanese(time)}{japanese(noun)}を{jverb}"
+        response = f"わたしは{japanese(time)}{japanese(noun)}{particle}{jverb}"
 
     elif tense == 2:
 
         english_prompt = f"I {have_already_done} the {noun}."
         vclass = j_verb_class(verb)
         jverb = polite_form(verb, vclass, Tense.PAST, Polarity.POSITIVE)
-        response = f"わたしはもう{japanese(noun)}を{jverb}"
+        response = f"わたしはもう{japanese(noun)}{particle}{jverb}"
 
     if tense == 3:
         time = pick(nouns.times_past)
         english_prompt = f"I {did_not_do} the {noun} {time}."
         vclass = j_verb_class(verb)
         jverb = polite_form(verb, vclass, Tense.PAST, Polarity.NEGATIVE)
-        response = f"わたしは{japanese(time)}{japanese(noun)}を{jverb}"
+        response = f"わたしは{japanese(time)}{japanese(noun)}{particle}{jverb}"
 
     elif tense == 4:
         english_prompt = f"I {have_not_done} the {noun} yet."
         vclass = j_verb_class(verb)
         jverb = te_form(verb, vclass)
-        response = f"わたしはまだ{japanese(noun)}を{jverb}いません"
+        response = f"わたしはまだ{japanese(noun)}{particle}{jverb}いません"
 
     try:
         user_input = input(english_prompt + "\n")
@@ -684,3 +689,20 @@ def obligation_practice():
         for response in possible_responses:
             print(response)
         pass
+
+
+def practice_all():
+    while True:
+        practice_func = pick(
+            [
+                qualify_noun,
+                random_short_form,
+                single_ongoing_negative,
+                plan_practice,
+                # become_practice,
+                tai_practice,
+                # n_desu_practice,
+                obligation_practice,
+            ]
+        )
+        practice_func()
