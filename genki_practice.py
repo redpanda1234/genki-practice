@@ -27,8 +27,6 @@ plain_form = jvfg.generate_plain_form
 # Requires: verb, verb_class
 te_form = jvfg.generate_te_form
 
-# たい form. Requires: verb, verb_class, formality, polarity
-volitional_form = jvfg.generate_volitional_form
 # ------------------------------------------------------------------ #
 
 
@@ -155,12 +153,16 @@ def verb_class(en_verb):
         assert False  # Haha what
 
 
-def j_verb_class(en_verb):
+def j_verb_class(j_verb):
     """
     same as above but the input is japanese
     """
-    verb = df[[en_verb == entry for entry in df["word"]]]
+    verb = df[[j_verb == entry for entry in df["word"]]]
+    if len(verb) == 0:
+        verb = df[[j_verb == entry for entry in df["kanji"]]]
+
     verb_class = verb["pos"].values[0]
+
     if verb_class == "ru-verb":
         return VerbClass.ICHIDAN
     elif verb_class == "u-verb":
@@ -444,9 +446,7 @@ def single_ongoing_negative():
         else:
             print("correct\n")
     except UnicodeDecodeError:
-        print(
-            f"{response} is the expected answer. You weren't necessarily wrong though.\n"
-        )
+        print(f"{response} is the expected answer.\n")
         pass
 
 
@@ -456,30 +456,30 @@ def comparison_practice():
 
 
 def plan_practice():
-    (ntype, verb, en_verb) = pick(
+    (ntype, j_verb, j_part, en_verb) = pick(
         [
-            (nouns.do_able, "する", "to do"),
-            (nouns.eat_able, "たべる", "to eat"),
-            (nouns.see_able, "みる", "to see"),
-            (nouns.read_able, "よむ", "to read"),
-            (nouns.drink_able, "のむ", "to drink"),
-            (nouns.write_able, "かく", "to write"),
-            (nouns.buy_able, "かう", "to buy"),
-            (nouns.places_absolute, "いく", "to go"),
+            (nouns.do_able, "する", "を", "to do"),
+            (nouns.eat_able, "たべる", "を", "to eat"),
+            (nouns.see_able, "みる", "を", "to see"),
+            (nouns.read_able, "よむ", "を", "to read"),
+            (nouns.drink_able, "のむ", "を", "to drink"),
+            (nouns.write_able, "かく", "を", "to write"),
+            (nouns.buy_able, "かう", "を", "to buy"),
+            (nouns.places_absolute, "いく", "に", "to go"),
         ]
     )
 
-    en_noun = pick(noun_type)
+    en_noun = pick(ntype)
     j_noun = japanese(en_noun)
 
-    vclass = j_verb_class(vclass)
+    vclass = j_verb_class(j_verb)
 
     past, polarity, en_tense, j_tense = pick(
         [
             (True, Polarity.POSITIVE, "I was planning", "つもりでした",),
             (True, Polarity.NEGATIVE, "I was not planning", "つもりでした",),
-            (False, Polarity.POSITIVE, "I plan", "つもりでした",),
-            (False, Polarity.NEGATIVE, "I do not plan", "つもりでした",),
+            (False, Polarity.POSITIVE, "I plan", "つもりです",),
+            (False, Polarity.NEGATIVE, "I do not plan", "つもりです",),
         ]
     )
 
@@ -487,15 +487,23 @@ def plan_practice():
         # If somehting _was_ our plan before, it could have been for
         # any time.
         en_time = pick(nouns.times_past + nouns.times_future + nouns.times_absolute)
+
+    elif pick([True, True, False]):  # Give it some shitty odds
+        en_time = pick(nouns.times_future)
+
     else:
-        en_time = pick(nouns.times_future + nouns.times_absolute)
+        en_time = pick(nouns.times_absolute)
+
+    time_part = ""
+    if en_time in nouns.times_absolute:
+        time_part = "に"
 
     j_time = japanese(en_time)
 
-    jverb = plain_form(verb, vclass, Tense.NONPAST, polarity)
+    j_verb = plain_form(j_verb, vclass, Tense.NONPAST, polarity)
 
-    english_prompt = f'Translate "{en_tense} {en_verb} {noun} {en_time}"'
-    response = f"わたしは{time}{j_verb}{j_tense}"
+    english_prompt = f'Translate "{en_tense} {en_verb} {en_noun} {en_time}"'
+    response = f"わたしは{j_time}{time_part}{j_noun}{j_part}{j_verb}{j_tense}"
 
     try:
         user_input = input(english_prompt + "\n")
@@ -506,11 +514,71 @@ def plan_practice():
         else:
             print("correct\n")
     except UnicodeDecodeError:
-        print(
-            f"{response} is the expected answer. You weren't necessarily wrong though.\n"
-        )
+        print(f"{response} is the expected answer.\n")
         pass
 
 
 def become_practice():
     pass
+
+
+def tai_practice():
+    (ntype, j_verb, en_verb) = pick(
+        [
+            (nouns.do_able, "する", "to do"),
+            (nouns.study_able, "勉強する", "to study"),
+            (nouns.become_able, "なる", "to become"),
+            (nouns.animals, "飼う", "to own"),
+            (nouns.eat_able, "食べる", "to eat"),
+            (nouns.see_able, "見る", "to see"),
+            (nouns.read_able, "読む", "to read"),
+            (nouns.drink_able, "飲む", "to drink"),
+            (nouns.write_able, "書く", "to write"),
+            (nouns.buy_able, "買う", "to buy"),
+            # (nouns.places_absolute, "行く", "to go"),
+        ]
+    )
+
+    en_noun = pick(ntype)
+    j_noun = japanese(en_noun)
+
+    vclass = j_verb_class(j_verb)
+
+    tai_suffix, en_prefix = pick(
+        [
+            ("たいです", "[I] want"),
+            ("たくないです", "[I] do not want"),
+            ("たかった", "[I] wanted"),
+            ("たくなかった", "[I] didn't want"),
+            ("たがっています", "[Mary] seems to want"),
+            ("たがっていました", "[Mary] seems to have wanted"),
+        ]
+    )
+
+    # if past:
+    #     # If somehting _was_ our plan before, it could have been for
+    #     # any time.
+    #     en_time = pick(nouns.times_past + nouns.times_future + nouns.times_absolute)
+    # else:
+    #     en_time = pick(nouns.times_future + nouns.times_absolute)
+    # j_time = japanese(en_time)
+
+    j_verb = polite_form(j_verb, vclass, Tense.NONPAST, Polarity.POSITIVE)
+
+    # Trim off the 「ます」at the end
+    j_verb = j_verb[0:-2]
+
+    english_prompt = f'Translate "{en_prefix} {en_verb} {en_noun}"'
+    response = f"{j_noun}を{j_verb}{tai_suffix}"
+
+    try:
+        user_input = input(english_prompt + "\n")
+        # print(f"you said {user_input}")
+        if user_input != response:
+            print(f"{response} is the expected answer\n")
+            return
+        else:
+            print("correct\n")
+    except UnicodeDecodeError:
+        print(f"{response} is the expected answer.\n")
+        pass

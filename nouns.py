@@ -607,6 +607,8 @@ noun_lists = [
     personal_places,
     places_absolute,
     durations,
+    times_past,
+    times_future,
     times_relative,
     times_absolute,
     categories,
