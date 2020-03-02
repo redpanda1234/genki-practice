@@ -621,7 +621,12 @@ def obligation_practice():
     vclass = j_verb_class(j_verb)
 
     in_the_past = pick([True, False])
+
+    en_n_desu = ""
+
     do_n_desu = pick([True, False])
+    if do_n_desu:
+        en_n_desu = "(explanation)"
 
     n_desu = ""
     en_time = ""
@@ -636,6 +641,8 @@ def obligation_practice():
             "くちゃいけませんでした",
         ]
         if do_n_desu:
+            j_suffixes = [suffix[:-3] for suffix in j_suffixes]  # trim the でした
+
             n_desu = "なんでした"
 
     else:
@@ -654,9 +661,12 @@ def obligation_practice():
     j_verb = plain_form(j_verb, vclass, Tense.NONPAST, Polarity.NEGATIVE)
     j_verb = j_verb[0:-1]  # Trim off the 「い」at the end
 
-    english_prompt = f'Translate "{en_prefix} {en_verb} {en_noun} {en_time}"'
+    english_prompt = (
+        f'Translate "{en_prefix} {en_verb} {en_noun} {en_time} {en_n_desu}"'
+    )
     possible_responses = [
-        f"{j_time}{j_noun}{particle}{j_verb}{j_suffix}" for j_suffix in j_suffixes
+        f"{j_time}{j_noun}{particle}{j_verb}{j_suffix}{n_desu}"
+        for j_suffix in j_suffixes
     ]
 
     try:
