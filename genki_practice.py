@@ -204,6 +204,15 @@ def english(japanese):
 #                                                                    #
 # ------------------------------------------------------------------ #
 
+# Lesson 5
+def practice_counting():
+    """
+    Generates practice phrases like
+    七十円切手をにまいお願いします。
+    """
+
+    return
+
 
 def qualify_noun():
     """
