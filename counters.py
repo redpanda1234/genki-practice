@@ -1,3 +1,5 @@
+import copy  # For making deepcopies of dicts and stuff
+
 ######################################################################
 # Define some constants
 
@@ -168,6 +170,10 @@ def to_b(mora):
     return morph_cons(mora, b_)
 
 
+def to_g(mora):
+    return morph_cons(mora, g_)
+
+
 def to_z(mora):
     return morph_cons(mora, z_)
 
@@ -192,7 +198,7 @@ standard_prefixes = {
 
 # Class for each
 class Counter:
-    def __init__(self, counter_word, prefixes=dict(), mapping=dict()):
+    def __init__(self, counter_word, prefixes=dict(), morph_rules=dict()):
         """
         counter_word: The base counter word string.
             E.g., 「本」(sticks / pens / pencils / etc.)
@@ -208,9 +214,9 @@ class Counter:
                 10: "じゅっ",  # じっ is also standard but I just picked one
             }
 
-        mapping: a dictionary that gives any phonological morphing
+        morph_rules: a dictionary that gives any phonological morphing
                  rules that might occur.
-            E.g., mapping = { # The rules for 「本」
+            E.g., morph_rules = { # The rules for 「本」
                 1 : p_,
                 3 : b_,
                 6 : p_,
@@ -223,8 +229,8 @@ class Counter:
         for i in range(1, 11):
             if i not in prefixes.keys():
                 prefixes[i] = standard_prefixes[i]
-            if i not in mapping.keys():
-                mapping[i] = lambda x: x  # Give it the identity map
+            if i not in morph_rules.keys():
+                morph_rules[i] = lambda x: x  # Give it the identity map
 
         first_mora = counter_word[0]
         rest_of_cw = counter_word[1:]
@@ -235,13 +241,13 @@ class Counter:
         nums = (
             {i for i in range(1, 11)}
             | {"question"}
-            | set(mapping.keys())
+            | set(morph_rules.keys())
             | set(prefixes.keys())
         )
 
         for i in range(1, 11):
-            # print(mapping[i](first_mora))
-            new_map[i] = prefixes[i] + mapping[i](first_mora) + rest_of_cw
+            # print(morph_rules[i](first_mora))
+            new_map[i] = prefixes[i] + morph_rules[i](first_mora) + rest_of_cw
             # print(new_map[i])
         self.counter_word = counter_word
         self.qdict = new_map
@@ -261,11 +267,11 @@ class Counter:
             # balance
         else:
             if n == 10:
-                print(self.qdict[n])
+                # print(self.qdict[n])
                 return self.qdict[n]
             else:
                 m = n % 10  # Only want trailing digit
-                print(self.qdict[m])
+                # print(self.qdict[m])
                 return self.qdict[m]
 
 
@@ -274,9 +280,12 @@ class Counter:
 
 # Regular counters (no special rules)
 dollar_counter = Counter("ドル")
-yen_counter = Counter("円")
-sheets_counter = Counter("枚")
-degrees_counter = Counter("度")
+yen_counter = Counter("えん")
+sheet_counter = Counter("まい")
+degree_counter = Counter("ど")
+ten_counter = Counter("じゅう")
+ten_thousand_counter = Counter("まん")
+
 
 # Months
 # --------------------------------------------------------------------
@@ -291,21 +300,21 @@ month_counter = Counter("がつ", prefixes=month_prefixes)
 # Hours
 # --------------------------------------------------------------------
 hours_prefixes = {4: "よ", 7: "しち", 9: "く"}
-oclock_counter = Counter("時", prefixes=hours_prefixes)
-hours_counter = Counter("時間", prefixes=hours_prefixes)
+oclock_counter = Counter("じ", prefixes=hours_prefixes)
+hours_counter = Counter("じかん", prefixes=hours_prefixes)
 
 # Years, people
 # --------------------------------------------------------------------
 year_and_people_prefixes = {4: "よ"}
 
 # For saying stuff like "it was the year 2003"
-year_counter = Counter("年", prefixes=year_and_people_prefixes)
+year_counter = Counter("ねん", prefixes=year_and_people_prefixes)
 
 # For saying stuff like "that was 2003 years ago"
-years_counter = Counter("年間", prefixes=year_and_people_prefixes)
+years_counter = Counter("ねんかん", prefixes=year_and_people_prefixes)
 
 # Counting people has some special casework.
-naive_people_counter = Counter("人", prefixes=year_and_people_prefixes)
+naive_people_counter = Counter("にん", prefixes=year_and_people_prefixes)
 
 
 def people_quantifier(n):
@@ -317,12 +326,92 @@ def people_quantifier(n):
         return naive_people_counter.quantity(n)
 
 
-people_counter = Counter("人", prefixes=year_and_people_prefixes)
+people_counter = Counter("にん", prefixes=year_and_people_prefixes)
 people_counter.quantity = people_quantifier
 
 
 # Minutes
 # --------------------------------------------------------------------
-minute_prefixes = glottal_prefixes
-minute_map = {1: to_p, 3: to_b, 4: to_p, 6: to_p, 8: to_p, 10: to_p, "question": to_p}
-minute_counter = Counter("ふん", prefixes=minute_prefixes, mapping=minute_map)
+minute_prefixes = copy.deepcopy(glottal_prefixes)
+minute_prefixes[8] = "*" + minute_prefixes[8]  # * == optional
+
+# Construct dict for phonological morphing
+minute_morph_rules = dict()
+for i in [1, 3, 4, 6, 8, 10, "question"]:
+    minute_morph_rules[i] = to_p  # All of em change to p
+
+# For things like "it's 10:23"
+minute_counter = Counter("ふん", prefixes=minute_prefixes, morph_rules=minute_morph_rules)
+
+# For things like "That took 10 hours and 23 minuts"
+minutes_counter = Counter(
+    "ふんかん", prefixes=minute_prefixes, morph_rules=minute_morph_rules
+)
+
+
+# Sticks, cups, animals, hundreds
+# --------------------------------------------------------------------
+stick_prefixes = glottal_prefixes
+stick_morph_rules = {1: to_p, 3: to_b, 6: to_p, 8: to_p, 10: to_p, "question": to_b}
+
+stick_counter = Counter("ほん", prefixes=stick_prefixes, morph_rules=stick_morph_rules)
+cup_counter = Counter("はい", prefixes=stick_prefixes, morph_rules=stick_morph_rules)
+animal_counter = Counter("ひき", prefixes=stick_prefixes, morph_rules=stick_morph_rules)
+hundered_counter = Counter(
+    "ひゃく", prefixes=stick_prefixes, morph_rules=stick_morph_rules
+)
+
+
+# Pages, pounds
+# --------------------------------------------------------------------
+page_prefixes = copy.deepcopy(glottal_prefixes)
+for i in [1, 6, 8]:
+    page_prefixes[i] = "*" + page_prefixes[i]
+
+page_counter = Counter("ページ", page_prefixes)
+pound_counter = Counter("ポンド", page_prefixes)  # same prefixes
+
+
+# Months, lesson, times, small items
+# --------------------------------------------------------------------
+month_prefixes = glottal_prefixes
+months_counter = Counter("か月", prefixes=month_prefixes)
+lesson_counter = Counter("か", prefixes=month_prefixes)
+times_counter = Counter("かい", prefixes=month_prefixes)
+small_items_counter = Counter("こ", prefixes=month_prefixes)
+
+
+# Floors, houses
+# --------------------------------------------------------------------
+floor_prefixes = glottal_prefixes
+floor_morph_rules = {1: to_g, "question": to_g}
+
+floor_counter = Counter("かい", prefixes=floor_prefixes, morph_rules=floor_morph_rules)
+houses_counter = Counter("けん", prefixes=floor_prefixes, morph_rules=floor_morph_rules)
+
+# Cents, weks, books
+# --------------------------------------------------------------------
+cent_prefixes = copy.deepcopy(glottal_prefixes)
+del cent_prefixes[6]  # No glottal stop on 6 for some reason
+
+cents_counter = Counter("セント", prefixes=cent_prefixes)
+weeks_counter = Counter("しゅうかん", prefixes=cent_prefixes)
+books_counter = Counter("さつ", prefixes=cent_prefixes)
+years_of_age_counter = Counter("さい", prefixes=cent_prefixes)
+
+
+# Shoes, thousands
+# --------------------------------------------------------------------
+shoes_prefixes = cent_prefixes
+shoes_morph_rules = {3: to_z, "question": to_z}
+
+shoes_counter = Counter("そく", prefixes=shoes_prefixes, morph_rules=shoes_morph_rules)
+thousands_counter = Counter(
+    "せん", prefixes=shoes_prefixes, morph_rules=shoes_morph_rules
+)
+
+# Letters, street addresses
+# --------------------------------------------------------------------
+letters_prefixes = cent_prefixes
+letters_counter = Counter("つう", prefixes=letters_prefixes)
+street_address_counter = Counter("ちょうめ", prefixes=letters_prefixes)
