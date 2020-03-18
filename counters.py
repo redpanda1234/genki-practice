@@ -375,7 +375,7 @@ pound_counter = Counter("ポンド", page_prefixes)  # same prefixes
 # Months, lesson, times, small items
 # --------------------------------------------------------------------
 month_prefixes = glottal_prefixes
-months_counter = Counter("か月", prefixes=month_prefixes)
+months_counter = Counter("かげつ", prefixes=month_prefixes)
 lesson_counter = Counter("か", prefixes=month_prefixes)
 times_counter = Counter("かい", prefixes=month_prefixes)
 small_items_counter = Counter("こ", prefixes=month_prefixes)
