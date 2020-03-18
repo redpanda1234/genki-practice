@@ -129,31 +129,31 @@ def na_adj_te_form(dict_form):
 # Haven't implemented this yet but theoretically in the future we'll
 # use it when we make everything object oriented and declare lists of
 # valid adjectives / etc. to use with a given noun
-class Noun:
-    def __init__(self, dict_form):
-        self.dict_form = dict_form
-        return
+# class Noun:
+#     def __init__(self, dict_form):
+#         self.dict_form = dict_form
+#         return
 
-    def pre_no_specifiers():
-        """
+#     def pre_no_specifiers(self, prefix):
+#         """
+#         <prefix> の <self>.
+#         """
+#         return
 
-        """
-        return
+#     def post_no():
+#         """
 
-    def post_no():
-        """
-
-        """
-        return
-
-
-class Adjective(Noun):
-    def __init__(dict_form):
-        return
+#         """
+#         return
 
 
-def polite_form(adj, adj_class, tense, polarity):
-    """
-    adj: a string representing your chosen adjective. E.g., "さむい".
-    """
-    return
+# class Adjective(Noun):
+#     def __init__(dict_form):
+#         return
+
+
+# def polite_form(adj, adj_class, tense, polarity):
+#     """
+#     adj: a string representing your chosen adjective. E.g., "さむい".
+#     """
+#     return

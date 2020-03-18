@@ -15,6 +15,9 @@ from japaneseverbconjugator.src.constants.EnumeratedTypes import (
 
 jvfg = JapaneseVerbFormGenerator.JapaneseVerbFormGenerator()
 
+# Import the noun and adjective conjugator
+from NounAndAdjectiveConjugator import *
+
 # ================================================================== #
 # The provided macros are too verbose for me
 #
