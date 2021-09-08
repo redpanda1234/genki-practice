@@ -1,4 +1,6 @@
-kana_str = "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ"
+import genanki
+
+kana_str = "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶー"
 
 convert_kana = {
     "ァ": "ぁ",
@@ -84,6 +86,30 @@ convert_kana = {
     "ヱ": "ゑ",
     "ヲ": "を",
     "ン": "ん",
+    "ー": "ー",
 }
 
-search_url = "http://www.gavo.t.u-tokyo.ac.jp/ojad/search/index/sortprefix:accent/narabi1:kata_asc/narabi2:accent_asc/narabi3:mola_asc/yure:visible/curve:invisible/details:invisible/limit:20/word:"
+base_ojad_url = "http://www.gavo.t.u-tokyo.ac.jp/ojad/search/index/sortprefix:accent/narabi1:kata_asc/narabi2:accent_asc/narabi3:mola_asc/yure:visible/curve:invisible/details:invisible/limit:20/word:"
+
+base_jisho_url = "https://jisho.org/search/"
+
+genki_pitch_deck = genanki.Deck(1324420921, "Genki Pitch Accent (Test)")
+genki_pitch_model = genanki.Model(
+    1480722565,
+    "Genki Pitch Accent (Test)",
+    fields=[
+        {"name": "Expression", "font": "Liberation Sans"},
+        {"name": "Reading", "font": "Liberation Sans"},
+        {"name": "Meaning", "font": "Liberation Sans"},
+        {"name": "Notes", "font": "Liberation Sans"},
+        {"name": "Pitch Accent", "font": "Liberation Sans"},
+    ],
+    templates=[
+        {
+            "name": "Card 1",
+            "qfmt": r'<span style="font-family: irohamaru mikami; font-size: 50px; ">{{Expression}}</span>"',
+            "afmt": '<span style="font-family: irohamaru mikami; font-size: 50px;">{{furigana:Reading}}</span>\n\n<hr id=answer>\n\n<div class=left><span style="font-family: irohamaru mikami; font-size: 30px;">{{furigana:Meaning}}</span></div>\n\n<hr id=answer>\n\n<div class=left><span style="font-family: irohamaru mikami; font-size: 30px;">{{furigana:Notes}}</span></div>\n\n<div><span style="font-family: irohamaru mikami; font-size: 30px;">{{text:Pitch accent}}</span></div>',
+        },
+    ],
+    css='@font-face {font-family: irohamaru mikami; src: url("_irohamaru mikami.ttf");}\n\n.card {\n font-family: irohamaru mikami;\n font-size: 30px;\n text-align: center;\n color: black;\n background-color: white;\n word-wrap: break word;\n}\n.left {text-align: left}\n.jp {font-size: 30px}\n.win .jp {font-family: "irohamaru mikami", "いろはマルみかみ Regular";}\n.mac .jp {font-family: "irohamaru mikami", "いろはマルみかみ Regular";}\n.linux .jp {font-family: "irohamaru mikami", "いろはマルみかみ Regular";}\n.mobile .jp {font-family: "irohamaru mikami";}\n\n\n/*発声ボタン*/\nspan.accent_plain{\n    border-top: solid 1px;\n    padding-top:1px;\n}\n\nspan.accent_top{\n    color:red;\n    border-top: solid red 1px;\n    padding-top:1px;\n    background-image: url("_accent.png");\n    background-repeat: no-repeat;\n    background-position: right top;\n}\n\nspan.unvoiced{\n    background-color: #C3C3C3;\n}\n\nspan.char{\n    display: inline-block;\n    width:1em;\n    text-align: center;\n}',
+)
