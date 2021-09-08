@@ -1,0 +1,63 @@
+/*********************************************************************
+Paste this into the `Styling` tab for your cards in Anki. Don't
+forget to also copy `_accent-hook.png` into
+`~/.local/share/Anki2/User\ 1/collection.media/` or wherever your
+collections.media folder is. See https://docs.ankiweb.net/files.html
+*********************************************************************/
+
+@font-face {
+  font-family: irohamaru mikami;
+  src: url("_irohamaru mikami.ttf");
+}
+
+.card {
+  font-family: irohamaru mikami;
+  font-size: 30px;
+  text-align: center;
+  color: black;
+  background-color: white;
+  word-wrap: break word;
+}
+.left {
+  text-align: left;
+}
+.jp {
+  font-size: 30px;
+}
+.win .jp {
+  font-family: "irohamaru mikami", "いろはマルみかみ Regular";
+}
+.mac .jp {
+  font-family: "irohamaru mikami", "いろはマルみかみ Regular";
+}
+.linux .jp {
+  font-family: "irohamaru mikami", "いろはマルみかみ Regular";
+}
+.mobile .jp {
+  font-family: "irohamaru mikami";
+}
+
+/*発声ボタン*/
+span.accent_plain {
+  border-top: solid 1px;
+  padding-top: 1px;
+}
+
+span.accent_top {
+  color: red;
+  border-top: solid red 1px;
+  padding-top: 1px;
+  background-image: url("_accent-hook.png");
+  background-repeat: no-repeat;
+  background-position: right top;
+}
+
+span.unvoiced {
+  background-color: #c3c3c3;
+}
+
+span.char {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+}

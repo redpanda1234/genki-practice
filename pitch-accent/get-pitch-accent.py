@@ -1,116 +1,30 @@
 import json
 import requests
+
 from bs4 import BeautifulSoup
 from tqdm import tqdm
-
 from copy import deepcopy
 
-kana_str = "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ"
-
-convert_kana = {
-    "ァ": "ぁ",
-    "ア": "あ",
-    "ィ": "ぃ",
-    "イ": "い",
-    "ゥ": "ぅ",
-    "ウ": "う",
-    "ェ": "ぇ",
-    "エ": "え",
-    "ォ": "ぉ",
-    "オ": "お",
-    "カ": "か",
-    "ガ": "が",
-    "キ": "き",
-    "ギ": "ぎ",
-    "ク": "く",
-    "グ": "ぐ",
-    "ケ": "け",
-    "ゲ": "げ",
-    "コ": "こ",
-    "ゴ": "ご",
-    "サ": "さ",
-    "ザ": "ざ",
-    "シ": "し",
-    "ジ": "じ",
-    "ス": "す",
-    "ズ": "ず",
-    "セ": "せ",
-    "ゼ": "ぜ",
-    "ソ": "そ",
-    "ゾ": "ぞ",
-    "タ": "た",
-    "ダ": "だ",
-    "チ": "ち",
-    "ヂ": "ぢ",
-    "ッ": "っ",
-    "ツ": "つ",
-    "ヅ": "づ",
-    "テ": "て",
-    "デ": "で",
-    "ト": "と",
-    "ド": "ど",
-    "ナ": "な",
-    "ニ": "に",
-    "ヌ": "ぬ",
-    "ネ": "ね",
-    "ノ": "の",
-    "ハ": "は",
-    "バ": "ば",
-    "パ": "ぱ",
-    "ヒ": "ひ",
-    "ビ": "び",
-    "ピ": "ぴ",
-    "フ": "ふ",
-    "ブ": "ぶ",
-    "プ": "ぷ",
-    "ヘ": "へ",
-    "ベ": "べ",
-    "ペ": "ぺ",
-    "ホ": "ほ",
-    "ボ": "ぼ",
-    "ポ": "ぽ",
-    "マ": "ま",
-    "ミ": "み",
-    "ム": "む",
-    "メ": "め",
-    "モ": "も",
-    "ャ": "ゃ",
-    "ヤ": "や",
-    "ュ": "ゅ",
-    "ユ": "ゆ",
-    "ョ": "ょ",
-    "ヨ": "よ",
-    "ラ": "ら",
-    "リ": "り",
-    "ル": "る",
-    "レ": "れ",
-    "ロ": "ろ",
-    "ヮ": "ゎ",
-    "ワ": "わ",
-    "ヰ": "ゐ",
-    "ヱ": "ゑ",
-    "ヲ": "を",
-    "ン": "ん",
-}
-
-search_url = "http://www.gavo.t.u-tokyo.ac.jp/ojad/search/index/sortprefix:accent/narabi1:kata_asc/narabi2:accent_asc/narabi3:mola_asc/yure:visible/curve:invisible/details:invisible/limit:20/word:"
+from constants import *
 
 
 def katakana_to_hiragana(k_str):
     new_str = ""
     for char in k_str:
         if char in convert_kana:
-            new_str += convert_kana(char)
+            new_str += convert_kana[char]
         else:
             new_str += char
     return new_str
 
 
 def ingest_data():
+    """
+    Given `test.json`, a json-exported copy of the anki deck we want
+    to grab pitch accent things for, load it in.
+    """
     with open("/tmp/test.json", "r") as f:
         return json.load(f)
-    # with open("/tmp/Kanji_in_Context__Revised_Edition/deck.json", "r") as f:
-    #     return json.load(f)
 
 
 def get_pitches_for_card(query_term):
@@ -151,9 +65,7 @@ def match_to_reading(unprocessed_readings, unprocessed_pitches):
             if katakana_to_hiragana(reading) == katakana_to_hiragana(pitch_reading):
                 output_pitch_htmls += [str(unprocessed_pitches[i])]
 
-    output_str = (
-        "\n".join(output_pitch_htmls).replace("<", "&lt;").replace(">", "&gt;")[1:]
-    )
+    output_str = "\n".join(output_pitch_htmls).replace("<", "&lt;").replace(">", "&gt;")
 
     return output_str
 
@@ -213,7 +125,6 @@ def main():
         f.write(write_me)
 
     print(f"There were {len(exceptions)} exceptions.")
-    # print(*exceptions, sep="\n")
 
 
 def test():
@@ -237,7 +148,6 @@ def test2():
 
 
 if __name__ == "__main__":
-    # clear_pitches()
     main()
     # test()
     # test2()
