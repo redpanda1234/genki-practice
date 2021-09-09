@@ -53,19 +53,15 @@ def match_to_reading(unprocessed_readings, unprocessed_pitches):
     for reading in readings:
         for (i, pitch_reading) in enumerate(pitch_readings):
             if katakana_to_hiragana(reading) == katakana_to_hiragana(pitch_reading):
-                output_pitch_htmls += [str(unprocessed_pitches[i])]
-
-    output_str = "\n".join(output_pitch_htmls).replace("<", "&lt;").replace(">", "&gt;")
-
+                if str(unprocessed_pitches[i]) not in output_pitch_htmls:
+                    output_pitch_htmls += [str(unprocessed_pitches[i])]
+    output_str = (
+        "</li><li>".join(output_pitch_htmls).replace("<", "&lt;").replace(">", "&gt;")
+    )
     return output_str
 
 
 def get_pitch(query_term, reading):
     pitch_accents = get_pitches_for_term(query_term)
     pitch_str = match_to_reading(reading, pitch_accents)
-    # if not pitch_str:
-    #     print(reading)
-    # print(f"exception: {query_term}")
-    # TODO: Add a way to track exceptions
-
     return pitch_str

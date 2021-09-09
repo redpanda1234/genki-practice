@@ -66,6 +66,7 @@ def main():
         if not pd.isnull(row["kanji"]):
             kanji = clean_word(row["kanji"])
             word = clean_word(row["word"])
+
             # REMOVE THIS
             if "、" in word:
                 print(f"these are fucked: {kanji}, {word}")
@@ -86,13 +87,19 @@ def main():
             for word in words:
                 furigana = get_furigana(kanji, word)
                 pitch_str = get_pitch(kanji, furigana)
+                if pitch_str in pitches:
+                    continue
                 if not pitch_str:
                     mondais += [ind]
                 furiganas += [furigana]
                 pitches += [pitch_str]
 
             f_str = "\n\n".join(furiganas)
-            p_str = "\n\n".join(pitches)
+            p_str = "<ul>"
+            for p in pitches:
+                p_str += f"<li>{p}</li>"
+            p_str += "</ul>"
+            p_str = p_str.replace("<", "&lt;").replace(">", "&gt;")
 
             pitch_note = genanki.Note(
                 model=genki_pitch_model,  # in constants.py
@@ -123,20 +130,26 @@ def main():
         # pitch deck in constants.py
         genki_pitch_deck.add_note(pitch_note)
 
+    # The deck is a global variable so if this part fucks up u can
+    # still come back from it by trying to look at the deck
     genanki.Package(genki_pitch_deck).write_to_file(
         "../anki-data/Genki_pitch/test-anki-2.apkg"
     )
 
     try:
         print("There were some problems.")
-        mondai_df = pd.iloc[np.array(mondais)]
+        mondai_df = np.array(dfrows)[np.array(mondais)]
+
+        c = {0: "word", 1: "kanji", 2: "pos", 3: "english", 4: "lesson"}
+        mdf.rename(columns=c, inplace=True)
+
         mondai_df.to_csv("mondais.csv", index=False)
     except:
         return mondais
 
 
 if __name__ == "__main__":
-    main()
+    mondais = main()
 
 
 # [\w ]*[0-9]*\%|[█▏▎▍▌▊▋▉▉]*[\w ]*|[ ]*[0-9/ ]*\[[0-9,:< \.a-z/]*\]\0
