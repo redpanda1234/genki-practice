@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import string
 
@@ -61,7 +62,7 @@ def filter_by(df, col, val):
 
 
 def clean_lesson_tag(tag_str):
-    tag_strs = tag_str.split(",")
+    tag_strs = re.split(",|;", tag_str)
 
     new_tags = []
     for tag in tag_strs:
