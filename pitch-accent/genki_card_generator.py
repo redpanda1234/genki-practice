@@ -133,7 +133,7 @@ def main():
     # The deck is a global variable so if this part fucks up u can
     # still come back from it by trying to look at the deck
     genanki.Package(genki_pitch_deck).write_to_file(
-        "../anki-data/Genki_pitch/test-anki-2.apkg"
+        "../anki-data/Genki_pitch/genki_pitch.apkg"
     )
 
     try:
