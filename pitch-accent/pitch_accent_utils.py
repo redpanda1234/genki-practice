@@ -63,9 +63,9 @@ def match_to_reading(unprocessed_readings, unprocessed_pitches):
 def get_pitch(query_term, reading):
     pitch_accents = get_pitches_for_term(query_term)
     pitch_str = match_to_reading(reading, pitch_accents)
-    if not pitch_str:
-        print(reading)
-        # print(f"exception: {query_term}")
-        # TODO: Add a way to track exceptions
+    # if not pitch_str:
+    #     print(reading)
+    # print(f"exception: {query_term}")
+    # TODO: Add a way to track exceptions
 
     return pitch_str

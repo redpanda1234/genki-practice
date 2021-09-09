@@ -4,6 +4,8 @@ import js2py
 import genanki
 import requests
 
+import numpy as np
+
 from multiprocessing import Pool
 from bs4 import BeautifulSoup
 from tqdm import tqdm
@@ -33,17 +35,7 @@ print("Done!")
 
 
 def get_furigana(kanji_word, reading):
-    return_me = ""
-    try:
-        return_me = furi(kanji_word, reading)
-    except:
-        print(f"this reading is fucked: {reading}. Kanji was {kanji_word}")
-        assert False
-    try:
-        assert return_me is not None
-    except AssertionError:
-        print(f"this reading made the js break: {reading}. Kanji was {kanji_word}")
-    return return_me
+    return furi(kanji_word, reading)
 
 
 def test_word(k_word, reading):
@@ -68,7 +60,8 @@ def main():
         else:
             dfrows += [row]
 
-    for row in tqdm(dfrows):
+    mondais = []
+    for (ind, row) in tqdm(list(enumerate(dfrows))):
         row_tags = clean_lesson_tag(row["lesson"])
         if not pd.isnull(row["kanji"]):
             kanji = clean_word(row["kanji"])
@@ -91,59 +84,55 @@ def main():
             furiganas = []
             pitches = []
             for word in words:
-                try:
-                    assert set(word) <= set(kana_str)
-                except AssertionError:
-                    print(
-                        f"what the fuck is happening in word {word} for kanji {kanji}"
-                    )
-                    assert False
-
                 furigana = get_furigana(kanji, word)
-                # pitch_str = get_pitch(kanji, furigana)
-
+                pitch_str = get_pitch(kanji, furigana)
+                if not pitch_str:
+                    mondais += [ind]
                 furiganas += [furigana]
-                # pitches += [pitch_str]
+                pitches += [pitch_str]
 
-            try:
-                f_str = "\n\n".join(furiganas)
-            except TypeError:
-                print(word, kanji)
-            # print(f_str)
-            # p_str = "\n\n".join(pitches)
+            f_str = "\n\n".join(furiganas)
+            p_str = "\n\n".join(pitches)
 
-            # pitch_note = genanki.Note(
-            #     model=genki_pitch_model,  # in constants.py
-            #     fields=[
-            #         row["kanji"],
-            #         f_str,
-            #         row["english"],
-            #         row["pos"],
-            #         p_str,
-            #     ],
-            #     tags=row_tags,
-            # )
-        # else:
-        #     # lmao this is kind of dumb
-        #     pitch_str = get_pitch(row["word"], row["word"])
-        #     pitch_note = genanki.Note(
-        #         model=genki_pitch_model,
-        #         fields=[
-        #             row["word"],
-        #             row["word"],
-        #             row["english"],
-        #             row["pos"],
-        #             pitch_str,
-        #         ],
-        #         tags=row_tags,
-        #     )
+            pitch_note = genanki.Note(
+                model=genki_pitch_model,  # in constants.py
+                fields=[
+                    row["kanji"],
+                    f_str,
+                    row["english"],
+                    row["pos"],
+                    p_str,
+                ],
+                tags=row_tags,
+            )
+        else:
+            # lmao this is kind of dumb
+            pitch_str = get_pitch(row["word"], row["word"])
+            pitch_note = genanki.Note(
+                model=genki_pitch_model,
+                fields=[
+                    row["word"],
+                    row["word"],
+                    row["english"],
+                    row["pos"],
+                    pitch_str,
+                ],
+                tags=row_tags,
+            )
 
-    #     # pitch deck in constants.py
-    #     genki_pitch_deck.add_note(pitch_note)
+        # pitch deck in constants.py
+        genki_pitch_deck.add_note(pitch_note)
 
-    # genanki.Package(genki_pitch_deck).write_to_file(
-    #     "~/files/genki-practice/anki-data/test-test-anki.apkg"
-    # )
+    genanki.Package(genki_pitch_deck).write_to_file(
+        "../anki-data/Genki_pitch/test-anki-2.apkg"
+    )
+
+    try:
+        print("There were some problems.")
+        mondai_df = pd.iloc[np.array(mondais)]
+        mondai_df.to_csv("mondais.csv", index=False)
+    except:
+        return mondais
 
 
 if __name__ == "__main__":
