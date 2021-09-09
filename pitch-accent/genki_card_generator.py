@@ -1,3 +1,4 @@
+import re
 import json
 import js2py
 import genanki
@@ -15,7 +16,7 @@ from pitch_accent_utils import *
 
 
 def clean_word(word):
-    return word.replace("（〜を）", "").replace("〜", "")
+    return re.sub("（[^>]+）", "", word)
 
 
 def filter_non_kana(some_str):
@@ -32,7 +33,17 @@ print("Done!")
 
 
 def get_furigana(kanji_word, reading):
-    return furi(kanji_word, reading)
+    return_me = ""
+    try:
+        return_me = furi(kanji_word, reading)
+    except:
+        print(f"this reading is fucked: {reading}. Kanji was {kanji_word}")
+        assert False
+    try:
+        assert return_me is not None
+    except AssertionError:
+        print(f"this reading made the js break: {reading}. Kanji was {kanji_word}")
+    return return_me
 
 
 def test_word(k_word, reading):
@@ -42,27 +53,50 @@ def test_word(k_word, reading):
 
 
 def main():
-    dfrows = list(df.iterrows())
-    for _, row in tqdm(dfrows):
+    dfrows = [row for (_, row) in df.iterrows()]
+    for row in tqdm(dfrows):
         row_tags = clean_lesson_tag(row["lesson"])
         if not pd.isnull(row["kanji"]):
-            if row["kanji"][0] == "〜" and row["word"][0] == "〜":
-                row["kanji"] = row["kanji"][1:-1]
-                row["word"] = row["kanji"][1:-1]
-            if row["kanji"][-1] == "〜" and row["word"][-1] == "〜":
-                row["kanji"] = row["kanji"][0:-2]
-                row["word"] = row["kanji"][0:-2]
+            kanji = clean_word(row["kanji"])
+            word = clean_word(row["word"])
+            if kanji[0] in shitty_tildes and word[0] in shitty_tildes:
+                kanji = kanji[1:]
+                word = word[1:]
+            if kanji[-1] in shitty_tildes and word[-1] in shitty_tildes:
+                kanji = kanji[0:-1]
+                word = word[0:-1]
+            # assert "～" == "〜"
 
-            furigana = get_furigana(row["kanji"], row["word"])
-            pitch_str = get_pitch(row["kanji"], furigana)
+            # Treat the cases where there are multiple valid pronunciations
+            words = word.split("/")
+            furiganas = []
+            pitches = []
+            for word in words:
+                try:
+                    assert set(word) <= set(kana_str)
+                except AssertionError:
+                    print(
+                        f"what the fuck is happening in word {word} for kanji {kanji}"
+                    )
+                    assert False
+
+                furigana = get_furigana(kanji, word)
+                pitch_str = get_pitch(kanji, furigana)
+
+                furiganas += [furigana]
+                pitches += [pitch_str]
+
+            f_str = "\n\n".join(furiganas)
+            p_str = "\n\n".join(pitches)
+
             pitch_note = genanki.Note(
                 model=genki_pitch_model,  # in constants.py
                 fields=[
                     row["kanji"],
-                    furigana,
+                    f_str,
                     row["english"],
                     row["pos"],
-                    pitch_str,
+                    p_str,
                 ],
                 tags=row_tags,
             )
@@ -71,16 +105,22 @@ def main():
             pitch_str = get_pitch(row["word"], row["word"])
             pitch_note = genanki.Note(
                 model=genki_pitch_model,
-                fields=[row["word"], "", row["english"], row["pos"], pitch_str],
+                fields=[
+                    row["word"],
+                    row["word"],
+                    row["english"],
+                    row["pos"],
+                    pitch_str,
+                ],
                 tags=row_tags,
             )
 
-        # pitch deck in constants.py
-        genki_pitch_deck.add_note(pitch_note)
+    #     # pitch deck in constants.py
+    #     genki_pitch_deck.add_note(pitch_note)
 
-    genanki.Package(genki_pitch_deck).write_to_file(
-        "~/files/genki-practice/anki-data/test-anki.apkg"
-    )
+    # genanki.Package(genki_pitch_deck).write_to_file(
+    #     "~/files/genki-practice/anki-data/test-test-anki.apkg"
+    # )
 
 
 if __name__ == "__main__":

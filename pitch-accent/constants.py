@@ -89,6 +89,8 @@ convert_kana = {
     "ー": "ー",
 }
 
+shitty_tildes = ("～", "〜")
+
 base_ojad_url = "http://www.gavo.t.u-tokyo.ac.jp/ojad/search/index/sortprefix:accent/narabi1:kata_asc/narabi2:accent_asc/narabi3:mola_asc/yure:visible/curve:invisible/details:invisible/limit:20/word:"
 
 base_jisho_url = "https://jisho.org/search/"
