@@ -16,7 +16,7 @@ from pitch_accent_utils import *
 
 
 def clean_word(word):
-    return re.sub("（[^>]+）", "", word)
+    return re.sub("[a-zA-Z ＋]*", "", re.sub("（[^>]+）", "", word))
 
 
 def filter_non_kana(some_str):
@@ -53,12 +53,31 @@ def test_word(k_word, reading):
 
 
 def main():
-    dfrows = [row for (_, row) in df.iterrows()]
+    pre_dfrows = [row for (_, row) in df.iterrows()]
+
+    # Some words are stored in the genki excel file with multiple
+    # kanji. It's actually just two: kotae and hayaku.
+    dfrows = []
+    for row in pre_dfrows:
+        if not pd.isnull(row["kanji"]):
+            newrow = deepcopy(row)
+            kanjis = row["kanji"].split("/")
+            for kanji in kanjis:
+                newrow["kanji"] = kanji
+                dfrows += [newrow]
+        else:
+            dfrows += [row]
+
     for row in tqdm(dfrows):
         row_tags = clean_lesson_tag(row["lesson"])
         if not pd.isnull(row["kanji"]):
             kanji = clean_word(row["kanji"])
             word = clean_word(row["word"])
+            # REMOVE THIS
+            if "、" in word:
+                print(f"these are fucked: {kanji}, {word}")
+                continue
+
             if kanji[0] in shitty_tildes and word[0] in shitty_tildes:
                 kanji = kanji[1:]
                 word = word[1:]
@@ -81,39 +100,43 @@ def main():
                     assert False
 
                 furigana = get_furigana(kanji, word)
-                pitch_str = get_pitch(kanji, furigana)
+                # pitch_str = get_pitch(kanji, furigana)
 
                 furiganas += [furigana]
-                pitches += [pitch_str]
+                # pitches += [pitch_str]
 
-            f_str = "\n\n".join(furiganas)
-            p_str = "\n\n".join(pitches)
+            try:
+                f_str = "\n\n".join(furiganas)
+            except TypeError:
+                print(word, kanji)
+            # print(f_str)
+            # p_str = "\n\n".join(pitches)
 
-            pitch_note = genanki.Note(
-                model=genki_pitch_model,  # in constants.py
-                fields=[
-                    row["kanji"],
-                    f_str,
-                    row["english"],
-                    row["pos"],
-                    p_str,
-                ],
-                tags=row_tags,
-            )
-        else:
-            # lmao this is kind of dumb
-            pitch_str = get_pitch(row["word"], row["word"])
-            pitch_note = genanki.Note(
-                model=genki_pitch_model,
-                fields=[
-                    row["word"],
-                    row["word"],
-                    row["english"],
-                    row["pos"],
-                    pitch_str,
-                ],
-                tags=row_tags,
-            )
+            # pitch_note = genanki.Note(
+            #     model=genki_pitch_model,  # in constants.py
+            #     fields=[
+            #         row["kanji"],
+            #         f_str,
+            #         row["english"],
+            #         row["pos"],
+            #         p_str,
+            #     ],
+            #     tags=row_tags,
+            # )
+        # else:
+        #     # lmao this is kind of dumb
+        #     pitch_str = get_pitch(row["word"], row["word"])
+        #     pitch_note = genanki.Note(
+        #         model=genki_pitch_model,
+        #         fields=[
+        #             row["word"],
+        #             row["word"],
+        #             row["english"],
+        #             row["pos"],
+        #             pitch_str,
+        #         ],
+        #         tags=row_tags,
+        #     )
 
     #     # pitch deck in constants.py
     #     genki_pitch_deck.add_note(pitch_note)
